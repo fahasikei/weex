@@ -2725,7 +2725,7 @@ function parsePagingEnabledNode(node){
 
 #### **主要功能**
 
-registerGesttrue.js文件主要是用于实现weex不支持组件及属性，由于weex不支持的组件属性需要由gesture-loader.js扫描并交由自定义方法执行回调，所以此文件主要是实现组件属性或事件的集合。
+registerGesture.js文件主要是用于实现weex不支持组件及属性，由于weex不支持的组件属性需要由gesture-loader.js扫描并交由自定义方法执行回调，所以此文件主要是实现组件属性或事件的集合。
 
 支持如下事件或属性：
 
@@ -2770,7 +2770,7 @@ const gestureMap = new Map([
 
 注意：其中组件属性名或事件名需要和gesture-loader.js中检测指定名一致， 组件属性名或事件名的实现方法需要保持与weex官方文档中的效果以及回调保持一致。
 
-2. 要注意gesture-loader.js和register Gesttrue.js的映射关系，weex_harmongy_registerGesture在被调用时传入的参数为gesture-loader文件中取得的，所以保险起见在register Gesttrue文件中去自定义实现方法的时候要清楚函数得到的参数内容
+2. 要注意gesture-loader.js和registerGesture.js的映射关系，weex_harmongy_registerGesture在被调用时传入的参数为gesture-loader文件中取得的，所以保险起见在registerGesture文件中去自定义实现方法的时候要清楚函数得到的参数内容
 
 ```javascript
 /**

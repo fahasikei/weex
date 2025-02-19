@@ -2,7 +2,7 @@
  * gesture-loader插件
  * 
  */
-const { parse:domParse } = require('@vue/compiler-dom')
+const { parse: domParse } = require('@vue/compiler-dom')
 const compiler = require('vue-template-compiler')
 const babelParser = require('@babel/parser')
 const babelTraverse = require('@babel/traverse').default
@@ -19,17 +19,17 @@ let moduleHash = ''
 /**
  * 解析<template> <script> <style>三段式中开标签的属性
  */
-function resolveOpeningElementAttrs(attrs){
+function resolveOpeningElementAttrs(attrs) {
   const attrKeys = Object.keys(attrs)
   let attrsString = ''
-  if(attrKeys.length == 0) return ''
-  
-  attrKeys.forEach((key) =>{
-    if(typeof attrs[key] === 'boolean') {
+  if (attrKeys.length == 0) return ''
+
+  attrKeys.forEach((key) => {
+    if (typeof attrs[key] === 'boolean') {
       // 如果属性值为true 则在开标签的写法为 <script module>
       // 为保持格式一直，在属性前空格
-      attrsString += ` ${key}`   
-    } else if(typeof attrs[key] === 'string') {
+      attrsString += ` ${key}`
+    } else if (typeof attrs[key] === 'string') {
       // 如果属性值为字符串 则在开标签的写法为 <script lang='ts'>
       // 为保持格式一直，在属性前空格
       attrsString += ` ${key}=${attrs[key]}`
@@ -41,9 +41,9 @@ function resolveOpeningElementAttrs(attrs){
 /**
  * 将vue三段式中的template组成完成的字符串代码
  */
-function generateTemplateCode(template){
+function generateTemplateCode(template) {
   // 兼容.vue文件中没有template模块情况
-  if(!template) return ''
+  if (!template) return ''
   const templateContent = template.content
   let templateString = ''
 
@@ -54,9 +54,9 @@ function generateTemplateCode(template){
 /**
  * 将vue三段式中的script组成完成的字符串代码
  */
-function generateScriptCode(script){
+function generateScriptCode(script) {
   // 兼容.vue文件中没有script模块情况
-  if(!script) return ''
+  if (!script) return ''
   const scriptContent = script.content
   let scriptString = ''
 
@@ -72,9 +72,9 @@ function generateScriptCode(script){
  * 将vue三段式中的styles组成完成的字符串代码
  */
 
-function generateStyleCode(styles){
+function generateStyleCode(styles) {
   // styles是一个数组，在vue中<style>标签可以有多个用于作用于同一个组件
-  if(styles.length == 0) return ''
+  if (styles.length == 0) return ''
 
   const stylesString = []
   styles.forEach((style) => {
@@ -86,13 +86,13 @@ function generateStyleCode(styles){
     stylesString.push(styleString)
   })
 
-  return stylesString.join('') 
+  return stylesString.join('')
 }
 
 /**
  * 将vue三段式组成完成字符串代码
  */
-function generateSFC(template, script, styles){
+function generateSFC(template, script, styles) {
   const templateCode = generateTemplateCode(template)
   const scriptCode = generateScriptCode(script)
   const styleCode = generateStyleCode(styles)
@@ -111,18 +111,18 @@ let camelCaseMap = new Set()
  * 判断是否为windows环境
  * @returns
  */
-function isWin32(){
-  if(process.platform === 'win32') {
-      return true
+function isWin32() {
+  if (process.platform === 'win32') {
+    return true
   } else {
-      return false
+    return false
   }
 }
 
 /**
  * 清除当前模块的全局变量，以便下次循环使用
  */
-function clearData(){
+function clearData() {
   camelCaseMap.clear()
   eventOrAttrsMap = []
   classNameId = 1
@@ -132,25 +132,25 @@ function clearData(){
 /**
  * 计算插件位置
  */
-function getPluginPath(){
+function getPluginPath() {
   const currentPath = path.resolve(__dirname, './registerGesture.js')
-  if(isWin32()) {
-      return path.relative(currentResolveModulePath, currentPath).replace('..\\','').replace(/\\/g,'/')
+  if (isWin32()) {
+    return path.relative(currentResolveModulePath, currentPath).replace('..\\', '').replace(/\\/g, '/')
   } else {
-      return path.relative(currentResolveModulePath, currentPath).replace('../','')
+    return path.relative(currentResolveModulePath, currentPath).replace('../', '')
   }
 }
 
 /**
  * 解析元素标签名，若为驼峰格式则记录到camelCaseMap中
  */
-function camelCaseParseNode(element){
+function camelCaseParseNode(element) {
   const isCamelCase = /^[a-z][a-zA-z0-9]*$/   // 检测小驼峰和全小写
   const isPascalCase = /^[A-Z][a-zA-Z0-9]*$/  // 检测大驼峰
   const { tag, children } = element
-  if(tag) {
-    if(isCamelCase.test(tag) || isPascalCase.test(tag)){
-      if(!/^[a-z0-9]*$/.test(tag)){
+  if (tag) {
+    if (isCamelCase.test(tag) || isPascalCase.test(tag)) {
+      if (!/^[a-z0-9]*$/.test(tag)) {
         // 记录驼峰形式命名的组件
         camelCaseMap.add(tag)
       }
@@ -158,15 +158,15 @@ function camelCaseParseNode(element){
   }
   children?.forEach((item) => {
     camelCaseParseNode(item)
-})
+  })
 }
 
 /**
  * 扫描标签，收集驼峰形式的组件名
  */
-function isCamelCase(templateString){
+function isCamelCase(templateString) {
   const ast = domParse(templateString)
-  ast.children.forEach((element) =>{
+  ast.children.forEach((element) => {
     camelCaseParseNode(element)
   })
 }
@@ -174,11 +174,11 @@ function isCamelCase(templateString){
 /**
  * 解析元素标签名，如果该标签名和camelCaseMap中的标签名相同，则该标签名还原
  */
-function parseNodeName(node){
-  if(node && node.tagName) {
+function parseNodeName(node) {
+  if (node && node.tagName) {
     const { tagName, children } = node
     camelCaseMap.forEach((item) => {
-      if(item.toLowerCase() === tagName) {
+      if (item.toLowerCase() === tagName) {
         node.tagName = item
       }
     })
@@ -192,7 +192,7 @@ function parseNodeName(node){
 /**
  * 遍历元素节点，让组件名复位
  */
-function resetComponentName(templateAst){
+function resetComponentName(templateAst) {
   templateAst.forEach((node) => {
     parseNodeName(node)
   })
@@ -204,84 +204,84 @@ function resetComponentName(templateAst){
  * 1、动态去除:paging-enabled属性
  * 2、添加该子元素添加父元素div并设置style属性为动态样式
  */
-function parsePagingEnabledNode(node){
-    // 如果无子节点直接返回
-    const { children } = node
-    if(!children || children.length === 0) return 
-  
-    // 如果元素上已经有:style='weexHarmonyDivStyle'，则表示已经对list列表做处理
-    if(node.attributes?.find((attr) => attr.key === ':style' && attr.value === 'weexHarmonyDivStyle')) return
-  
-    let isPagingEnabled = false
-    // 遍历直接子节点，判断直接子节点是否存在PagingEnabled属性
-    children.forEach((node) => {
-      if(node.attributes?.find((attr) => attr.key === ':paging-enabled')) {
-        isPagingEnabled = true
+function parsePagingEnabledNode(node) {
+  // 如果无子节点直接返回
+  const { children } = node
+  if (!children || children.length === 0) return
+
+  // 如果元素上已经有:style='weexHarmonyDivStyle'，则表示已经对list列表做处理
+  if (node.attributes?.find((attr) => attr.key === ':style' && attr.value === 'weexHarmonyDivStyle')) return
+
+  let isPagingEnabled = false
+  // 遍历直接子节点，判断直接子节点是否存在PagingEnabled属性
+  children.forEach((node) => {
+    if (node.attributes?.find((attr) => attr.key === ':paging-enabled')) {
+      isPagingEnabled = true
+    }
+  })
+
+  // 如果设置 pagingEnabled属性
+  if (isPagingEnabled) {
+    const nodeArray = []
+    node.children.forEach((node) => {
+      if (node.attributes?.find((attr) => attr.key === ':paging-enabled')) {
+        nodeArray.push({
+          type: 'element',
+          tagName: 'div',
+          attributes: [{
+            key: ':style', value: 'weexHarmonyDivStyle'
+          }],
+          children: [node]
+        })
+      } else {
+        nodeArray.push(node)
       }
     })
-  
-    // 如果设置 pagingEnabled属性
-    if(isPagingEnabled) {
-      const nodeArray = []
-       node.children.forEach((node) => {
-        if(node.attributes?.find((attr) => attr.key === ':paging-enabled')){
-          nodeArray.push({
-            type:'element',
-            tagName: 'div',
-            attributes: [{
-              key:':style', value: 'weexHarmonyDivStyle'
-            }],
-            children: [node]
-          })
-        } else {
-          nodeArray.push(node)
-        }
-      })
-      node.children = nodeArray
-    }
+    node.children = nodeArray
+  }
 
-    children.forEach((node) => {
-        if(node.type === 'element') {
-            parsePagingEnabledNode(node)
-        }
-    })
+  children.forEach((node) => {
+    if (node.type === 'element') {
+      parsePagingEnabledNode(node)
+    }
+  })
 }
 
 /**
  * 感知该属性并为List添加必要属性：style以及classId
  */
-function checkPagingEnabled(templateAst){
-    if(!templateAst) return
-    templateAst.forEach((node) => {
-        if(node.type === 'element') {
-            if(node.attributes?.find((attr) => attr.key === ':paging-enabled')){
-                node.attributes.push({
-                    key:'style',
-                    value: 'overflow: hidden !important'
-                })
-                eventOrAttrsMap.push({
-                    isEvent: false,
-                    name: ':paging-enabled',
-                    params: [],
-                    handler: ''
-                  })
-                // 为元素设置id
-                setClassId(node.attributes)
-            }
-        }
-        checkPagingEnabled(node.children)
-    })
+function checkPagingEnabled(templateAst) {
+  if (!templateAst) return
+  templateAst.forEach((node) => {
+    if (node.type === 'element') {
+      if (node.attributes?.find((attr) => attr.key === ':paging-enabled')) {
+        node.attributes.push({
+          key: 'style',
+          value: 'overflow: hidden !important'
+        })
+        eventOrAttrsMap.push({
+          isEvent: false,
+          name: ':paging-enabled',
+          params: [],
+          handler: ''
+        })
+        // 为元素设置id
+        setClassId(node.attributes)
+      }
+    }
+    checkPagingEnabled(node.children)
+  })
 }
 
 /**
  * 给List添加父元素div并且div添加动态style属性
  */
-function addParentElement(templateAst){
-    templateAst.forEach((node) => {
-        if(node.type === 'element') {
-            parsePagingEnabledNode(node)
-        }
-    })
+function addParentElement(templateAst) {
+  templateAst.forEach((node) => {
+    if (node.type === 'element') {
+      parsePagingEnabledNode(node)
+    }
+  })
 }
 
 /**
@@ -289,9 +289,9 @@ function addParentElement(templateAst){
  * 1、感知该属性并为List添加必要属性：style以及classId
  * 2、给List添加父元素div并且div添加动态style属性
  */
-function parsePagingEnable(templateAst){
-    checkPagingEnabled(templateAst)
-    addParentElement(templateAst)
+function parsePagingEnable(templateAst) {
+  checkPagingEnabled(templateAst)
+  addParentElement(templateAst)
 }
 
 let needTranslate = false
@@ -300,7 +300,7 @@ let needTranslate = false
  * 解析template，当前解析template使用的是himalaya，该工具包会将小驼峰解析为全小写
  * 因此需要将hlText转为hl-text
  */
-function resolveTemplate(template){
+function resolveTemplate(template) {
   const templateContent = template.content
   const templateAst = parse(templateContent)
 
@@ -320,7 +320,7 @@ function resolveTemplate(template){
   parseGroupingChildElements(templateAst)
 
   // 只有当模块中存在绑定指定的事件和属性时，才会做组件名还原和将templateAst转为代码字符串
-  if(elementMap.length !== 0 || needTranslate) {
+  if (elementMap.length !== 0 || needTranslate) {
     // 遍历节点，将himalaya改动的组件名还原
     resetComponentName(templateAst)
 
@@ -346,15 +346,15 @@ function resolveScript(script) {
 /**
  * 解析Vue的SFC代码
  */
-function resolveVueSFC(source){
+function resolveVueSFC(source) {
   const moduleResoveRet = compiler.parseComponent(source)
   const { template, script, styles } = moduleResoveRet
-    
+
   // 解析 template 和 script代码
   resolveTemplate(template)
 
   // 只有当模块中存在绑定指定的事件和属性时，才会解析scriptAst
-  if(elementMap.length !== 0 || needTranslate) {
+  if (elementMap.length !== 0 || needTranslate) {
     resolveScript(script)
     // 清除缓存，准备进入下次循环
     clearData()
@@ -431,16 +431,16 @@ let elementMap = []
 /**
  * 解析事件的属性值
  */
-function parseEventAttrValue(attrValue){
+function parseEventAttrValue(attrValue) {
   // 当属性值存在即 @touchstart="fnc" 这种格式
-  if(attrValue) {
+  if (attrValue) {
     // 匹配回调函数参数，例如xxx='xxx(index, item)' 这种调用形式，则会匹配index和item参数值
-    const regTem = /([a-zA-Z_$][a-zA-Z\d_$]*)\s*(?=[,\)])/g   
+    const regTem = /([a-zA-Z_$][a-zA-Z\d_$]*)\s*(?=[,\)])/g
     // 如果未匹配到即params为null，则说明不是函数调用形式而是变量引用形式，例如 xxx='xxx'格式
     let params = attrValue.match(regTem)
     // 如果params有值，则handler则会去掉()这种形式，从xxx='xxx(index, item)' 变为xxx='xxx'
     let handler = params ? attrValue.split('(')[0]?.trim() : attrValue
-    
+
     return {
       handler,
       params
@@ -457,7 +457,7 @@ function parseEventAttrValue(attrValue){
 /**
  * 当元素绑定事件或属性后，则为元素设置唯一classID
  */
-function setClassId(attributes){
+function setClassId(attributes) {
   const className = 'weex-harmony-register-' + moduleHash + '-' + classNameId
   classNameId++
 
@@ -467,13 +467,13 @@ function setClassId(attributes){
   })
 
   const classProperty = attributes.find((item) => item.key === 'class')
-  if(classProperty) {
+  if (classProperty) {
     classProperty.value = `${classProperty.value} ${className}`
   } else {
-      attributes.push({
-          key: 'class',
-          value: className
-      })
+    attributes.push({
+      key: 'class',
+      value: className
+    })
   }
 
   // 将eventOrAttrsMap清空，方便解析下一个元素节点时使用
@@ -483,9 +483,9 @@ function setClassId(attributes){
 /**
  * 解析修饰符
  */
-function parseModifier(key){
-    const modifier = key.split('.').slice(1)
-    return modifier
+function parseModifier(key) {
+  const modifier = key.split('.').slice(1)
+  return modifier
 }
 
 /**
@@ -499,12 +499,12 @@ function parseModifier(key){
     show-scrollbar=' '                ' '
  */
 function parseAttrValue(attrKey, attrValue) {
-  if(attrKey.startsWith(':')) {
-    return  { handler:attrValue, isIdentifer: true }
+  if (attrKey.startsWith(':')) {
+    return { handler: attrValue, isIdentifer: true }
   } else {
-    if(attrValue === null) {
+    if (attrValue === null) {
       return { handler: null, isIdentifer: false }
-    } else if(attrValue === ''){
+    } else if (attrValue === '') {
       return { handler: '', isIdentifer: false }
     } else {
       return { handler: attrValue, isIdentifer: false }
@@ -518,29 +518,29 @@ function parseAttrValue(attrKey, attrValue) {
  * 2、若绑定则记录绑定事件到数组中并为元素设置唯一id
  * 3、去掉绑定的属性或者事件
  */
-function parseTemplateNode(node){
-  if(!node) return 
+function parseTemplateNode(node) {
+  if (!node) return
   const { attributes, children } = node
   let isBindEventOrAttrs = false
 
   // 遍历属性，收集属性和事件信息
   attributes.forEach((attr) => {
     // 遍历事件
-    if(EVENTS_MAP.find((item) => attr.key.includes(item))) {
-        const modifier = parseModifier(attr.key)
-        const { handler, params } = parseEventAttrValue(attr.value)
-        eventOrAttrsMap.push({
-          isEvent: true,
-          name: attr.key,
-          modifier,
-          handler,
-          params,
-        })
-        isBindEventOrAttrs = true
+    if (EVENTS_MAP.find((item) => attr.key.includes(item))) {
+      const modifier = parseModifier(attr.key)
+      const { handler, params } = parseEventAttrValue(attr.value)
+      eventOrAttrsMap.push({
+        isEvent: true,
+        name: attr.key,
+        modifier,
+        handler,
+        params,
+      })
+      isBindEventOrAttrs = true
     }
 
     // 遍历属性
-    if(ATTRS_MAP.find((item) => attr.key.includes(item))) {
+    if (ATTRS_MAP.find((item) => attr.key.includes(item))) {
       const { handler, isIdentifer } = parseAttrValue(attr.key, attr.value)
       eventOrAttrsMap.push({
         isEvent: false,
@@ -554,18 +554,18 @@ function parseTemplateNode(node){
     }
   })
 
-  if(isBindEventOrAttrs) {
+  if (isBindEventOrAttrs) {
     // 为元素设置id
     setClassId(attributes)
     // 去掉事件或，如果不清除原来绑定的事件，则有的事件会触发两次
-    node.attributes = attributes.filter((attr) =>{
-        return !EVENTS_MAP.find((item) => attr.key.includes(item))
+    node.attributes = attributes.filter((attr) => {
+      return !EVENTS_MAP.find((item) => attr.key.includes(item))
     })
   }
 
   // 遍历下一个元素节点
   children.forEach((node) => {
-    if(node.type === 'element') {
+    if (node.type === 'element') {
       parseTemplateNode(node)
     }
   })
@@ -574,40 +574,40 @@ function parseTemplateNode(node){
 /**
  * 处理子元素
  */
-function parseNode(node){
-  if(!node) return 
+function parseNode(node) {
+  if (!node) return
   const { attributes, children } = node
   let isBindEventOrAttrs = false
 
   // 遍历属性，收集属性和事件信息
   attributes.forEach((attr) => {
     // 遍历事件
-    if(attr.key.includes('appear') || attr.key.includes('disappear')) {
-        const modifier = parseModifier(attr.key)
-        const { handler, params } = parseEventAttrValue(attr.value)
-        eventOrAttrsMap.push({
-          isEvent: true,
-          name: attr.key,
-          modifier,
-          handler,
-          params,
-        })
-        isBindEventOrAttrs = true
+    if (attr.key.includes('appear') || attr.key.includes('disappear')) {
+      const modifier = parseModifier(attr.key)
+      const { handler, params } = parseEventAttrValue(attr.value)
+      eventOrAttrsMap.push({
+        isEvent: true,
+        name: attr.key,
+        modifier,
+        handler,
+        params,
+      })
+      isBindEventOrAttrs = true
     }
   })
 
-  if(isBindEventOrAttrs) {
+  if (isBindEventOrAttrs) {
     // 为元素设置id
     setClassId(attributes)
     // 去掉事件或，如果不清除原来绑定的事件，则有的事件会触发两次
-    node.attributes = attributes.filter((attr) =>{
-        return !(attr.key.includes('appear') || attr.key.includes('disappear'))
+    node.attributes = attributes.filter((attr) => {
+      return !(attr.key.includes('appear') || attr.key.includes('disappear'))
     })
   }
 
   // 遍历下一个元素节点
   children.forEach((node) => {
-    if(node.type === 'element') {
+    if (node.type === 'element') {
       parseNode(node)
     }
   })
@@ -616,9 +616,9 @@ function parseNode(node){
 /**
  * 当解析到含有pading-enabled属性的list组件时，此时对list组件的子元素单独处理
  */
-function parseApparOrDisappear(nodes){
+function parseApparOrDisappear(nodes) {
   nodes.forEach((node) => {
-    if(node.type === 'element') {
+    if (node.type === 'element') {
       parseNode(node)
     }
   })
@@ -627,23 +627,23 @@ function parseApparOrDisappear(nodes){
 /**
  * 专门用于遍历开启pagingEnabled状态下的
  */
-function traverseAppearOrDisappear(node){
-  if(!node) return 
+function traverseAppearOrDisappear(node) {
+  if (!node) return
   const { attributes, children } = node
   let hasPagingEnabled = false
   attributes.forEach((attr) => {
-    if(attr.key.includes('paging-enabled')){
+    if (attr.key.includes('paging-enabled')) {
       hasPagingEnabled = true
     }
   })
 
   // 如果遍历到含有pading-enabled的List组件，则将子元素单独遍历，如果没有则继续遍历子元素
-  if(hasPagingEnabled) {
+  if (hasPagingEnabled) {
     parseApparOrDisappear(children)
   } else {
     // 遍历下一个元素节点
     children.forEach((node) => {
-      if(node.type === 'element') {
+      if (node.type === 'element') {
         traverseAppearOrDisappear(node)
       }
     })
@@ -653,9 +653,9 @@ function traverseAppearOrDisappear(node){
 /**
  * 遍历template中的元素节点
  */
-function traverseTemplateNode(templateAst){
+function traverseTemplateNode(templateAst) {
   templateAst.forEach((node) => {
-    if(node.type === 'element') {
+    if (node.type === 'element') {
       // 遍历开启pading-enabled状态下的appear/disappear
       traverseAppearOrDisappear(node)
 
@@ -669,13 +669,13 @@ function traverseTemplateNode(templateAst){
 /**
  * 创建import导入节点用于导入 weex_harmongy_registerGesture和chunkArray 注册函数
  */
-function buildImportDeclaration(){
+function buildImportDeclaration() {
   const importNode = t.importDeclaration(
-      [
-        t.importSpecifier(t.identifier('weex_harmongy_registerGesture'), t.identifier('weex_harmongy_registerGesture')),
-        t.importSpecifier(t.identifier('weex_harmony_chunkArray'), t.identifier('weex_harmony_chunkArray'))
-      ],
-      t.stringLiteral(getPluginPath())
+    [
+      t.importSpecifier(t.identifier('weex_harmongy_registerGesture'), t.identifier('weex_harmongy_registerGesture')),
+      t.importSpecifier(t.identifier('weex_harmony_chunkArray'), t.identifier('weex_harmony_chunkArray'))
+    ],
+    t.stringLiteral(getPluginPath())
   )
   return importNode
 }
@@ -684,27 +684,27 @@ function buildImportDeclaration(){
 /**
  * 解析handler，生成对应的ast节点
  */
-function parseHandler(eventOrAttrs){
-  if(eventOrAttrs.isEvent) {
+function parseHandler(eventOrAttrs) {
+  if (eventOrAttrs.isEvent) {
     // 解析事件handler
     return eventOrAttrs.handler ? t.memberExpression(t.thisExpression(), t.identifier(eventOrAttrs.handler)) : t.stringLiteral('')
   } else {
     // 解析属性handler
-    if(eventOrAttrs.isIdentifer) {
+    if (eventOrAttrs.isIdentifer) {
       // handler的值为数字、布尔值、或者变量
-      if(!Number.isNaN(Number(eventOrAttrs.handler))) {
+      if (!Number.isNaN(Number(eventOrAttrs.handler))) {
         return t.numericLiteral(Number(eventOrAttrs.handler))
-      } else if(eventOrAttrs.handler === 'true') {
+      } else if (eventOrAttrs.handler === 'true') {
         return t.booleanLiteral(true)
-      } else if(eventOrAttrs.handler === 'false'){
+      } else if (eventOrAttrs.handler === 'false') {
         return t.booleanLiteral(false)
       } else {
-       return t.memberExpression(t.thisExpression(), t.identifier(eventOrAttrs.handler))
+        return t.memberExpression(t.thisExpression(), t.identifier(eventOrAttrs.handler))
       }
     } else {
-      if(eventOrAttrs.handler === null) {
+      if (eventOrAttrs.handler === null) {
         return t.nullLiteral()
-      } else if(eventOrAttrs.handler === '') {
+      } else if (eventOrAttrs.handler === '') {
         return t.stringLiteral('')
       } else {
         return t.stringLiteral(eventOrAttrs.handler)
@@ -808,21 +808,21 @@ function buildHandlerNode() {
 /**
  * 解析mounted属性
  */
-function parseMounted(path){
+function parseMounted(path) {
   const node = path.node
   if (t.isObjectExpression(node.declaration)) {
     const properties = node.declaration.properties
     const result = properties.find(item => item.key.name == 'mounted')
-    if(result) {
-        result.body.body.push(...buildHandlerNode())
+    if (result) {
+      result.body.body.push(...buildHandlerNode())
     } else {
-        const mountedNode = t.objectMethod(
-            'method',
-            t.identifier('mounted'),
-            [],
-            t.blockStatement(buildHandlerNode())
-        )
-        properties.push(mountedNode)
+      const mountedNode = t.objectMethod(
+        'method',
+        t.identifier('mounted'),
+        [],
+        t.blockStatement(buildHandlerNode())
+      )
+      properties.push(mountedNode)
     }
   }
 }
@@ -830,58 +830,58 @@ function parseMounted(path){
 /**
  * 在data中添加数据
  */
-function addDataNode(path){
-    const node = path.node
-    if (elementMap.length !== 0) {
-        if (t.isObjectExpression(node.declaration)) {
-            const properties = node.declaration.properties
-            let hasPagingEnabled = false
+function addDataNode(path) {
+  const node = path.node
+  if (elementMap.length !== 0) {
+    if (t.isObjectExpression(node.declaration)) {
+      const properties = node.declaration.properties
+      let hasPagingEnabled = false
 
-            // 遍历elementMap数组，检测是否存在:paging-enabled属性
-            elementMap.forEach((item) => {
-              item.eventOrAttrsMap.forEach((item) => {
-                if(item.name === ':paging-enabled') {
-                  hasPagingEnabled = true
-                }
-              })
-            })
+      // 遍历elementMap数组，检测是否存在:paging-enabled属性
+      elementMap.forEach((item) => {
+        item.eventOrAttrsMap.forEach((item) => {
+          if (item.name === ':paging-enabled') {
+            hasPagingEnabled = true
+          }
+        })
+      })
 
-            if(hasPagingEnabled) {
-              const dataPropertyes = properties.find(item => item.key.name == 'data')
-              // 如果原来存在data属性则之间添加
-              if(dataPropertyes) {
-                const returnNode = dataPropertyes.body.body[0]
-                if(t.isReturnStatement(returnNode)) {
-                  const args = returnNode.argument
-                  if(t.isObjectExpression(args)){
-                    args.properties.push(t.objectProperty(
-                      t.identifier('weexHarmonyDivStyle'),
-                      t.stringLiteral('')
-                    ))
-                  }
-                }
-              } else {
-                // 如果原来不存在data属性则手动添加data(){}
-                const dataNode = t.objectMethod(
-                  'method',
-                  t.identifier('data'),
-                  [],
-                  t.blockStatement(
-                    t.returnStatement(
-                      t.objectExpression([
-                        t.objectProperty(
-                          t.identifier('weexHarmonyDivStyle'),
-                          t.stringLiteral('')
-                        )
-                      ])
-                    )
-                  )
-              )
-              properties.push(dataNode)
-              }
+      if (hasPagingEnabled) {
+        const dataPropertyes = properties.find(item => item.key.name == 'data')
+        // 如果原来存在data属性则之间添加
+        if (dataPropertyes) {
+          const returnNode = dataPropertyes.body.body[0]
+          if (t.isReturnStatement(returnNode)) {
+            const args = returnNode.argument
+            if (t.isObjectExpression(args)) {
+              args.properties.push(t.objectProperty(
+                t.identifier('weexHarmonyDivStyle'),
+                t.stringLiteral('')
+              ))
             }
+          }
+        } else {
+          // 如果原来不存在data属性则手动添加data(){}
+          const dataNode = t.objectMethod(
+            'method',
+            t.identifier('data'),
+            [],
+            t.blockStatement(
+              t.returnStatement(
+                t.objectExpression([
+                  t.objectProperty(
+                    t.identifier('weexHarmonyDivStyle'),
+                    t.stringLiteral('')
+                  )
+                ])
+              )
+            )
+          )
+          properties.push(dataNode)
         }
+      }
     }
+  }
 }
 
 /**
@@ -918,22 +918,22 @@ function parseMethods(path) {
 /**
  * 对vue默认导出做增删改操作
  */
-function parseDefaultDeclarationNode(path){
+function parseDefaultDeclarationNode(path) {
   if (elementMap.length !== 0) {
     // 解析mounted属性
-   parseMounted(path)
-   // 添加data数据
-   addDataNode(path)
-   //解析methods属性
-   parseMethods(path)
+    parseMounted(path)
+    // 添加data数据
+    addDataNode(path)
+    //解析methods属性
+    parseMethods(path)
   }
 }
 
 /**
  * 遍历scriptAst节点
  */
-function traverseNode(scriptAst){
-  if(!scriptAst) return
+function traverseNode(scriptAst) {
+  if (!scriptAst) return
 
   babelTraverse(scriptAst, {
     Program(path) {
@@ -944,26 +944,26 @@ function traverseNode(scriptAst){
       // 对export default {} 做增删改操作
       parseDefaultDeclarationNode(path)
     }
-  }) 
+  })
 }
 
 
-function createHash(string){
+function createHash(string) {
   var hash = 0, i, chr;
   if (string.length === 0) return hash;
   for (i = 0; i < string.length; i++) {
-  chr = string.charCodeAt(i);
-  hash = ((hash << 5) - hash) + chr;
-  hash |= 0; 
+    chr = string.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
   }
   return hash;
 }
 
 
 function parseDeleteChildren(templateAst) {
-  if(!templateAst) return
+  if (!templateAst) return
   templateAst.forEach((node) => {
-    if (node.type === 'element' && node.attributes?.find((attr) => attr.key === 'v-delete-children')){
+    if (node.type === 'element' && node.attributes?.find((attr) => attr.key === 'v-delete-children')) {
       node.children = []
       needTranslate = true
     }
@@ -983,10 +983,10 @@ function parseGroupingChildElements(templateAst) {
 /**
  * 感知该属性并为List添加必要属性：style以及classId
  */
-function checkGroupingChildElements(templateAst){
-  if(!templateAst) return
+function checkGroupingChildElements(templateAst) {
+  if (!templateAst) return
   templateAst.forEach((node) => {
-    if (node.type === 'element' && node.attributes?.find((attr) => attr.key === 'v-grouping-child-elements')){
+    if (node.type === 'element' && node.attributes?.find((attr) => attr.key === 'v-grouping-child-elements')) {
       setClassId(node.attributes)
       commitGroupingChildElements(node)
       needTranslate = true
@@ -995,67 +995,76 @@ function checkGroupingChildElements(templateAst){
   })
 }
 
-function commitGroupingChildElements(node){
+let chunkNum
+function commitGroupingChildElements(node) {
   needTranslate = true
-  const { attributes, children } = node
-  let chunkNum
-  attributes.forEach((attr) => {
-    if (attr.key.includes('v-grouping-child-elements')) {
-      chunkNum = attr.value
-    }
-  })
-  // 去除 v-grouping-child-elements 属性
-  node.attributes = node.attributes.filter((attr) => attr.key !== 'v-grouping-child-elements')
-  
-
-  // 处理 node 的子元素
-  const newChildren = []
-  for (const child of children) {
-    if (child.type === 'element' && child.attributes?.find((attr) => attr.key === 'v-for')) {
-      // v-for 的内容
-      const value = child.attributes.find((attr) => attr.key === 'v-for').value
-      let left, right
-
-      /*
-       * v-for 支持 "item of list" 和 "item in list" 两种语法，以下代码是对齐的兼容
-       * 注意可能会出现罕见的 "item of (attr in obj ? ls1 : ls2)" 的情况。
-       */
-      const IN_SEPARATOR = ' in '
-      const IN_POSITION = value.indexOf(IN_SEPARATOR)
-      const OF_SEPARATOR = ' of '
-      const OF_POSITION = value.indexOf(OF_SEPARATOR)
-      if (IN_POSITION >= 0 && (OF_POSITION === -1 || IN_POSITION < OF_POSITION)) {
-        [left, right] = [value.slice(0, IN_POSITION), value.slice(IN_POSITION + IN_SEPARATOR.length)];
-      } else if (OF_POSITION >= 0) {
-        [left, right] = [value.slice(0, OF_POSITION), value.slice(OF_POSITION + OF_SEPARATOR.length)];
-      } else {
-        console.error('v-grouping-child-elements 的子元素中的 v-for 格式不正确。')
-        return
+  if (node.type === 'element') {
+    const { attributes, children } = node
+    attributes.forEach((attr) => {
+      if (attr.key.includes('v-grouping-child-elements')) {
+        chunkNum = attr.value
       }
+    })
 
-      const ITEM_SYMBOL = '__GROUPING_ITEM'
-      const INDEX_SYMBOL = '__GROUPING_INDEX'
-      const SYMBOL_FOR_OLD_INDEX = '__GROUPING_ITEM_OLD_'
-      const newChildrenItem = {
-        ...child
-      }
-      // TODO: 1. 转换后的 index 会发生改变
-      // 转换后的 index 会发生改变，需要重命名 index
-      const HAS_INDEX = left.includes(',')
-      let item, index
-      if (HAS_INDEX) {
-        [item, index] = left.split(',')
-        index = index.trim().replace(")", "")
-        left = `${item}, ${SYMBOL_FOR_OLD_INDEX}${index})`
-      }
-      newChildrenItem.attributes = child.attributes.filter((attr) => attr.key !== 'v-for').concat([
-        {
-          key: 'v-for',
-          value: `${left} in ${ITEM_SYMBOL}`
+    // 去除 v-grouping-child-elements 属性
+    node.attributes = node.attributes.filter((attr) => attr.key !== 'v-grouping-child-elements')
+
+    // 处理 node 的子元素
+    parseGrouping(node)
+  }
+}
+
+// 处理带有v-grouping-child-elements属性元素的子元素
+function parseGrouping(node) {
+  const { children } = node
+  if (children && children.length != 0) {
+    const newChildren = []
+    for (const child of node.children) {
+      if (child.type === 'element' && checkGrouppingElements(child)) {
+        // v-for 的内容
+        const value = child.attributes.find((attr) => attr.key === 'v-for').value
+        let left, right
+
+        /*
+         * v-for 支持 "item of list" 和 "item in list" 两种语法，以下代码是对齐的兼容
+         * 注意可能会出现罕见的 "item of (attr in obj ? ls1 : ls2)" 的情况。
+         */
+        const IN_SEPARATOR = ' in '
+        const IN_POSITION = value.indexOf(IN_SEPARATOR)
+        const OF_SEPARATOR = ' of '
+        const OF_POSITION = value.indexOf(OF_SEPARATOR)
+        if (IN_POSITION >= 0 && (OF_POSITION === -1 || IN_POSITION < OF_POSITION)) {
+          [left, right] = [value.slice(0, IN_POSITION), value.slice(IN_POSITION + IN_SEPARATOR.length)];
+        } else if (OF_POSITION >= 0) {
+          [left, right] = [value.slice(0, OF_POSITION), value.slice(OF_POSITION + OF_SEPARATOR.length)];
+        } else {
+          console.error('v-grouping-child-elements 的子元素中的 v-for 格式不正确。')
+          return
         }
-      ])
 
-      const innerChild = [{
+        const ITEM_SYMBOL = '__GROUPING_ITEM'
+        const INDEX_SYMBOL = '__GROUPING_INDEX'
+        const SYMBOL_FOR_OLD_INDEX = '__GROUPING_ITEM_OLD_'
+        const newChildrenItem = {
+          ...child
+        }
+        // TODO: 1. 转换后的 index 会发生改变
+        // 转换后的 index 会发生改变，需要重命名 index
+        const HAS_INDEX = left.includes(',')
+        let item, index
+        if (HAS_INDEX) {
+          [item, index] = left.split(',')
+          index = index.trim().replace(")", "")
+          left = `${item}, ${SYMBOL_FOR_OLD_INDEX}${index})`
+        }
+        newChildrenItem.attributes = child.attributes.filter((attr) => attr.key !== 'v-for').concat([
+          {
+            key: 'v-for',
+            value: `${left} in ${ITEM_SYMBOL}`
+          }
+        ])
+
+        const innerChild = [{
           type: 'element',
           tagName: 'div',
           attributes: [
@@ -1070,30 +1079,48 @@ function commitGroupingChildElements(node){
         }]
         newChildrenItem.children = innerChild
 
-      // 添加中间层
-      newChildren.push({
-        type: 'element',
-        tagName: 'div',
-        attributes: [
-          {
-            key: 'v-for',
-            value: `(${ITEM_SYMBOL}, ${INDEX_SYMBOL}) in _chunkArray(${right}, ${chunkNum})`,
-          }
-        ],
-        children: [
-          newChildrenItem
-        ]
-      })
-    } else {
-      newChildren.push(child)
+        // 添加中间层
+        newChildren.push({
+          type: 'element',
+          tagName: 'div',
+          attributes: [
+            {
+              key: 'v-for',
+              value: `(${ITEM_SYMBOL}, ${INDEX_SYMBOL}) in _chunkArray(${right}, ${chunkNum})`,
+            }
+          ],
+          children: [
+            newChildrenItem
+          ]
+        })
+      } else {
+        newChildren.push(child)
+      }
+      parseGrouping(child)
     }
+    node.children = newChildren
   }
-  node.children = newChildren
 }
 
+// 判断是否含有v-grouping-child-ignore属性避免转换
+function checkGrouppingElements(children) {
+  if (children.attributes?.find((attr) => attr.key === 'v-for')) {
+    if (children.attributes?.find((attr) => attr.key === 'v-grouping-child-ignore' && attr.value === 'true')) {
+      children.attributes = children.attributes.filter((attr) => attr.key !== 'v-grouping-child-ignore')
+      return false
+    } else if (children.attributes?.find((attr) => attr.key === 'v-grouping-child-ignore' && attr.value === null)) {
+      children.attributes = children.attributes.filter((attr) => attr.key !== 'v-grouping-child-ignore')
+      return false
+    } else {
+      return true
+    }
+  } else {
+    return false
+  }
+}
 
-module.exports = function (source){
-  if(process.env.ISHARMONY === 'true') {
+module.exports = function (source) {
+  if (process.env.ISHARMONY === 'true') {
     // 根据当前解析模块路径生成对应的路径哈希
     moduleHash = createHash(this.resourcePath)
     // 获取当前解析模块的路径

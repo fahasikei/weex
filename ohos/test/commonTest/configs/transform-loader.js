@@ -53,6 +53,11 @@ const componentMap = [
     componentName: 'HlSlider',
     componentAddress: 'hl-slider-base.vue',
     isInPlugin: false
+  },
+  {
+    componentName: 'HlHwidbtn',
+    componentAddress: 'hl-hwidbtn-base.vue',
+    isInPlugin: false
   }
 ]
 const componentSet = new Set()
