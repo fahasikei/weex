@@ -83,6 +83,18 @@ struct Index {
               }
             })
           })
+
+        Button("一键登录测试")
+          .width('100%')
+          .fontWeight(FontWeight.Bold)
+          .onClick(() => {
+            router.pushUrl({
+              url: "pages/ExtWebPage",
+              params: {
+                url: 'resource://rawfile/frameworkTest_web/pages/loginPageTest/entry.html',
+              }
+            })
+          })
       }
     }
     .height('100%')

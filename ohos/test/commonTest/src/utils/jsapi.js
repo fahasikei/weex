@@ -110,6 +110,36 @@ export function updateWeexPackage(param) {
     });
   });
 }
+
+/**
+ * download下载
+ * @param {object} param
+ * @param {string} param.url 下载地址
+ * @param {string} param.fileType 文件类型
+ * @returns 
+ */
+export function downLoadTask(param) {
+  return new Promise((resolve, reject) => {
+    callNative('downloadTask', param, (res) => {
+      handleResult(resolve, reject, res)
+    })
+  })
+}
+
+/**
+ * 保存视屏至相册
+ * @param {object} param 
+ * @param {string} param.url 视频地址
+ * @returns 
+ */
+export function saveVideoToPhotosAlbum(param) {
+  return new Promise((resolve, reject) => {
+    callNative('saveVideoToPhotosAlbum', param, (res) => {
+      handleResult(resolve, reject, res)
+    })
+  })
+}
+
 /**
  * 删weex包
  * @param {object} param
@@ -353,7 +383,7 @@ export function callUp({ phoneNumber = '', isModal = 1, tipWords = '' }) {
  * {status:number, statusMessage:string}
  * @version h5(and_5.0.10;ios_5.0.10);weex(and_5.0.10;ios_5.0.10)
  */
- export function updateRes() {
+export function updateRes() {
   console.log('building jsapi.js updateRes');
   return new Promise((resolve, reject) => {
     console.log('building jsapi.js updateRes callNative');
@@ -938,18 +968,18 @@ export function nativeSlider(isLip, cb) {
       }
     } else if (isIos) {
       // ios
-      callNative('noSlider', { isLip }, () => {});
+      callNative('noSlider', { isLip }, () => { });
     }
   } else if (isWeb && isInUmeApp) {
     if (h5Ios) {
-      callNative('noSlider', { isLip }, () => {});
+      callNative('noSlider', { isLip }, () => { });
     }
     registerService('onBack', (data, nativeFn) => {
       nativeFn(isLip ? 0 : 1);
       // this.returnType = data;
       if (!isLip && cb && typeof cb === 'function') cb();
     });
-    callNative('h5Service', { serviceName: isLip ? [] : ['onBack'] }, () => {});
+    callNative('h5Service', { serviceName: isLip ? [] : ['onBack'] }, () => { });
   }
 }
 
@@ -959,7 +989,7 @@ export function nativeSlider(isLip, cb) {
 export function getReqHeader() {
   const p1 = new Promise((resolve, reject) => {
     if (isNative || isInUmeApp) {
-      callNative('getReqHeader', {}, (r) => {
+      callNative('getSystemInfo', {}, (r) => {
         let result = r;
         // 经测试，这个异步api一般在100ms以内
         try {
@@ -969,9 +999,9 @@ export function getReqHeader() {
           const data = result.data || {};
           xlog.log(`从客户端取出来的版本信息: ${JSON.stringify(data)}`);
           // 手动注入version解析出来的版本号
-          const rcver = data.rcver || '';
-          const version = rcverToNumber(rcver);
-          data.version = version;
+          // const rcver = data.rcver || '';
+          // const version = rcverToNumber(rcver);
+          // data.version = version;
           resolve(data);
         } catch (error) {
           reject(error);

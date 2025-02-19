@@ -22,6 +22,7 @@ import { sameLayerManager } from '../../samelayer/SameLayerManager';
 import { ViewAppear } from '../api/ViewAppear';
 import { StreamAPI } from '../api/StreamAPI';
 import { offKeyboard, onKeyboard } from '../api/KeyboardAPI';
+import { AccountAPI } from '../api/AccountAPI';
 
 const TAG: string = 'WebAdapter';
 
@@ -36,6 +37,7 @@ const advancedAPIs = new Map<string, Function>([
   ['onUpdateFailed', new UpdateApi().onUpdateFailed],
   ['onKeyboard', onKeyboard],
   ['offKeyboard', offKeyboard],
+  ['quickLoginAnonymousPhone', new AccountAPI().quickLoginAnonymousPhone]
 ])
 
 const advancedCbStringifyAPIs = new Set<string>([

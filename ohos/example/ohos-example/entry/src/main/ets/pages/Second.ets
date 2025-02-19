@@ -13,6 +13,8 @@
 import router from '@ohos.router';
 // import { ExtWeb, LocalUpdateManagerInstance, UpdateConfig } from 'WebSceneKit/Index';
 import { ExtWeb, LocalUpdateManagerInstance, UpdateConfig } from 'WebSceneKitHsp/Index';
+import { emitter } from '@kit.BasicServicesKit'
+import { EmitterID } from '../commonadapter/apimodel/EmitterCommon'
 
 @Entry
 @Component
@@ -24,6 +26,11 @@ struct Second {
     router.back({
       url: '',
       params: { isLoading: false }
+    })
+    emitter.emit({ eventId: EmitterID.EVENT_JUMP_NATIVE_ID }, {
+      data: {
+        nativeStatus: 'finish'
+      }
     })
     return true;
   }
