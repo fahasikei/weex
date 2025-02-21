@@ -20,6 +20,7 @@ const TAG: string = 'PageModelController';
 
 export class PageModelController {
   private static instance: PageModelController;
+  private isDelayingPageDown: boolean = false;
   public pageModelArray: Array<Array<PageModel>> = new Array();
   public pageStackArray: Array<NavPathStack> = new Array();
 
@@ -77,7 +78,7 @@ export class PageModelController {
   public pushPath(routeType: RouteType) {
     const nativePageId: number = this.getPageStackArrayLen() - 1;
     let pageModel: PageModel | undefined = this.getCurrentPageModel() as PageModel;
-    let nextPageModel: PageModel = new PageModel(new WebNodeController(), pageModel.id + 1);
+    let nextPageModel: PageModel = new PageModel(new WebNodeController(), pageModel?.id + 1);
     let pageModels = this.pageModelArray[nativePageId] ?? [];
     pageModels.push(nextPageModel);
     this.pageModelArray[nativePageId] = pageModels;
@@ -86,8 +87,12 @@ export class PageModelController {
 
     if (routeType === RouteType.MULTI_MULTI) {
       // 延迟下树 解决动效白屏
+      this.isDelayingPageDown = true;
       setTimeout(() => {
-        pageModel?.pageDown();
+        if (this.isDelayingPageDown) {
+          pageModel?.pageDown();
+          this.isDelayingPageDown = false;
+        }
       }, 300)
     } else {
       pageModel?.pageDown();
@@ -98,7 +103,7 @@ export class PageModelController {
   public replacePath() {
     const nativePageId: number = this.getPageStackArrayLen() - 1;
     let pageModel: PageModel | undefined = this.getCurrentPageModel() as PageModel;
-    let nextPageModel: PageModel = new PageModel(new WebNodeController(), pageModel.id);
+    let nextPageModel: PageModel = new PageModel(new WebNodeController(), pageModel?.id);
     let pageModels = this.pageModelArray[nativePageId] ?? [];
     pageModels.splice(-1, 1, nextPageModel);
 
@@ -134,7 +139,14 @@ export class PageModelController {
       this.pageStackArray.splice(nativePageId);
     }
     if (pageModel) {
-      pageModel?.pageDown();
+      // 延迟下树，解决动效白屏
+      setTimeout(() => {
+        pageModel?.pageDown();
+      }, 300)
+    }
+    if (this.isDelayingPageDown) {
+      // 上一个页面延迟下树未完成时取消该延迟下树操作
+      this.isDelayingPageDown = false;
     }
 
     let lastPageModel: PageModel | undefined = this.getCurrentPageModel();

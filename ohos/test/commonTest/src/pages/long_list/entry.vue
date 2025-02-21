@@ -6,7 +6,7 @@
             </cell>
         </list>
         <button class="btn" @click="addInfo">添加数据</button> -->
-    <list class="list-wrap" v-grouping-child-elements="5">
+    <!-- <list class="list-wrap" v-grouping-child-elements="5">
         <div>**************分组内层嵌套**************</div>
         <div v-if="true">
             <cell class="list-cell" v-for="(item, smart_index) in lists" :key="item">
@@ -18,7 +18,7 @@
                 <text class="item" @click='onstart(item, big_index)'>{{ `${item}--${big_index}` }}</text>
             </cell>
         </div>
-    </list>
+    </list> -->
     <!-- <list class="list-wrap" v-grouping-child-elements="5">
             <button class="btn" @click="showList">展示list内容</button>
             <div>**************内层嵌套且含v-if**************</div>
@@ -59,6 +59,30 @@
                         </ul>
                     </li>
                 </ul>
+            </div>
+        </list> -->
+        <list class="list-wrap" v-grouping-child-elements="50">
+            <div>**************Hit Test1**************</div>
+            <cell class="list-cell" v-for="(item, smart_index) in 10000" :key="item">
+                <text class="item" @click='onstart(lists[smart_index % lists.length], smart_index)'>{{ `${lists[smart_index % lists.length]}--${smart_index}` }}</text>
+            </cell>
+        </list>
+        <!-- <list class="list-wrap" v-grouping-child-elements="50">
+            <div>**************Hit Test2**************</div>
+            <button class="btn" @click="showList">展示list内容</button>
+            <div v-if="isHarmony">
+                <cell class="list-cell" v-for="(item, smart_index) in 10000" :key="item">
+                    <text class="item" @click='onstart(lists[smart_index % lists.length], smart_index)'>{{ `${lists[smart_index % lists.length]}--${smart_index}` }}</text>
+                </cell>
+            </div>
+        </list> -->
+        <!-- <list class="list-wrap">
+            <div>**************Hit Test3**************</div>
+            <button class="btn" @click="showList">展示list内容</button>
+            <div v-if="isHarmony" v-grouping-child-elements="50">
+                <cell class="list-cell" v-for="(item, smart_index) in 10000" :key="item">
+                    <text class="item" @click='onstart(lists[smart_index % lists.length], smart_index)'>{{ `${lists[smart_index % lists.length]}--${smart_index}` }}</text>
+                </cell>
             </div>
         </list> -->
 </div>

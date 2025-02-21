@@ -58,8 +58,7 @@ export struct ExtWeb {
   initLoad() {
     if(this.asMixWeb){
       RouterStorage.getInstance().urlConfig.set(UrlUtil.getUrlTemplate(this.url), new UrlInfo(4, ''))
-    }
-    if (RouterStorage.getInstance().getNodeType(this.url) !== NodeType.MIX_NODE) {
+    } else {
       // 新起原生页 nativePageId+1
       const taskUrls = GlobalRouter.getInstance().getTemplate(UrlUtil.addFakeDomain(this.url));
       WebManager.getInstance().templateNeed === -1 && (WebManager.getInstance().templateNeed = taskUrls.length);
@@ -91,7 +90,7 @@ export struct ExtWeb {
   build() {
     if(this.url && this.asMixWeb){
       NodeContainer(MixWebManager.getInstance().getWebNodeController(this.url))
-    } else if (!this.asMixWeb && this.url && RouterStorage.getInstance().getNodeType(this.url) !== NodeType.MIX_NODE) {
+    } else if (!this.asMixWeb && this.url) {
       Navigation(this.navPathStack) {
       }
       .navDestination(this.PageMap)

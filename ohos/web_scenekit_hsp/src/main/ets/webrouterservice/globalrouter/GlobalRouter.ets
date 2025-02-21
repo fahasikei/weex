@@ -285,7 +285,7 @@ export class GlobalRouter {
     const pageModelInstance = PageModelController.getInstance();
 
     // compare the popNum and current page num of this extWeb.
-    if (popNum > pageModelInstance.pageModelArray[nativePageId].length) {
+    if (pageModelInstance.pageModelArray[nativePageId] && popNum > pageModelInstance.pageModelArray[nativePageId].length) {
       popNum = pageModelInstance.pageModelArray[nativePageId].length;
     }
 
@@ -326,7 +326,7 @@ export class GlobalRouter {
       pageModelInstance.popPath(popNum, animated, routerType, pushPageType);
     }
 
-    if (pageModelInstance.pageModelArray[nativePageId].length === 0) {
+    if (pageModelInstance.pageModelArray[nativePageId] && pageModelInstance.pageModelArray[nativePageId].length === 0) {
       PageModelController.getInstance().pageModelArray.splice(nativePageId);
       router.back();
     }
